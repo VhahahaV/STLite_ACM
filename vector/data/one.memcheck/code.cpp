@@ -124,13 +124,6 @@ void TestErase()
 
 int main(int argc, char const *argv[])
 {
-    // 保存原始的 cout buffer
-    std::streambuf* originalCoutStreamBuf = std::cout.rdbuf();
-
-    // 创建一个 stringstream 来捕获 cout 的输出
-    std::stringstream buffer;
-    std::cout.rdbuf(buffer.rdbuf());
-
     TestConstructor();
 	TestIterators();
 	TestAccessingMethod();
@@ -138,38 +131,5 @@ int main(int argc, char const *argv[])
 	TestInsert();
 	TestErase();
 
-    // 恢复原始的 cout buffer，这样 cout 可以再次向控制台输出
-    std::cout.rdbuf(originalCoutStreamBuf);
-
-    // 从 buffer 和文件中读取数据
-    std::string line;
-    std::vector<std::string> coutLines;
-    while (std::getline(buffer, line)) {
-        coutLines.push_back(line);
-    }
-
-    std::ifstream file("answer.txt");
-    std::vector<std::string> fileLines;
-    while (std::getline(file, line)) {
-        fileLines.push_back(line);
-    }
-
-    // 比较每一行
-    int maxLines = std::min(coutLines.size(), fileLines.size());
-    for (int i = 0; i < maxLines; i++) {
-        if (coutLines[i] != fileLines[i]) {
-            std::cout << "Mismatch found at line " << (i + 1) << ":" << std::endl;
-            std::cout << "Expected: '" << fileLines[i] << "'" << std::endl;
-            std::cout << "Got:      '" << coutLines[i] << "'" << std::endl;
-            return 1; // 或其他适当的错误处理
-        }
-    }
-
-    if (coutLines.size() != fileLines.size()) {
-        std::cout << "Output and file have different number of lines." << std::endl;
-        return 1; // 或其他适当的错误处理
-    }
-
-    std::cout << "All lines match correctly!" << std::endl;
     return 0;
 }

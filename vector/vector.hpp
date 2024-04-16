@@ -222,7 +222,8 @@ public:
         mEnd = mStart = mEndOfStorage = nullptr;
     }
 	vector(const vector &other) {
-        T *tmp = new T[int(other.capacity())];
+//        T *tmp = new T[int(other.capacity())];
+        T *tmp = static_cast<T *>(malloc(sizeof(T) * other.capacity()));
         size_t sz = other.size();
         for (int i = 0; i < sz; ++i) {
             tmp[i] = other[i];
@@ -235,7 +236,7 @@ public:
 	 * TODO Destructor
 	 */
 	~vector() {
-        delete mStart;
+        free(mStart) ;
         mStart = mEnd = mEndOfStorage = nullptr;
     }
 	/**
@@ -244,8 +245,10 @@ public:
 	vector &operator=(const vector &other) {
         if (this == &other)
             return *this;
-        delete []mStart;
-        T *tmp = new T[int(other.capacity())];
+//        delete []mStart;
+        free(mStart);
+//        T *tmp = new T[int(other.capacity())];
+        T *tmp = static_cast<T *>(malloc(sizeof(T) * other.capacity()));
         size_t sz = other.size();
         for (int i = 0; i < sz; ++i) {
             tmp[i] = other[i];
@@ -430,7 +433,7 @@ public:
         }
 //        会调用构造函数
 //        *mEnd = value;
-//       new可以直接在指定的内存位置上构造对象
+//       new可以直接在指定的内存位置上构造对象,但是这里不能使用构造函数,
         new (mEnd) T(value);
         mEnd++;
 

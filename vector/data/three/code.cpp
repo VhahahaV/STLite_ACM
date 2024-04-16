@@ -13,7 +13,8 @@ void TestInteger()
 	std::cout << "Test for classes without default constructor..." << std::endl;
 	sjtu::vector<Integer> vInt;
 	for (int i = 1; i <= 100; ++i) {
-		vInt.push_back(Integer(i));
+        Integer ii = Integer(i);
+		vInt.push_back(ii);
 	}
 	std::cout << "Test OK..." << std::endl;
 }
@@ -45,7 +46,13 @@ void TestBint()
 
 int main()
 {
-	TestInteger();
-	TestMatrix();
-	TestBint();
+
+
+
+    TestInteger();
+    TestMatrix();
+    TestBint();
+
+
+    return 0;
 }

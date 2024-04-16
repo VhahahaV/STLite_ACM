@@ -5,7 +5,7 @@
 
 #include <climits>
 #include <cstddef>
-
+#include "iostream"
 //代码寄了，越界
 namespace sjtu {
 /**
@@ -18,7 +18,6 @@ private:
     T *mStart;
     T *mEnd;
     T *mEndOfStorage;
-    size_t length;
 
 
 public:
@@ -123,13 +122,98 @@ public:
 		bool operator!=(const const_iterator &rhs) const {
             return (this->pos != rhs.pos);
         }
-	};
+            };
 	/**
 	 * TODO
 	 * has same function as iterator, just for a const object.
 	 */
 	class const_iterator {
-        T *pos;
+        const T *pos;
+    public:
+        explicit const_iterator(const T* init): pos(init){}
+        const T* getPos(){
+            return pos;
+        }
+        /**
+         * return a new iterator which pointer n-next elements
+         * as well as operator-
+         */
+        const_iterator operator+(const int &n) const {
+            //TODO
+            return const_iterator(pos+n);
+        }
+        const_iterator operator-(const int &n) const {
+            //TODO
+            return const_iterator(pos-n);
+        }
+        // return the distance between two iterators,
+        // if these two iterators point to different vectors, throw invaild_iterator.
+        int operator-(const const_iterator &rhs) const {
+            //TODO
+            return (pos-rhs.pos);
+        }
+        const_iterator& operator+=(const int &n) {
+            //TODO
+            pos += n;
+            return *this;
+        }
+        const_iterator& operator-=(const int &n) {
+            //TODO
+            pos -= n;
+            return *this;
+        }
+        /**
+         * TODO iter++
+         */
+        const_iterator operator++(int) {
+            pos++;
+            return const_iterator(pos-1);
+        }
+        /**
+         * TODO ++iter
+         */
+        const_iterator& operator++() {
+            pos++;
+            return *this;
+        }
+        /**
+         * TODO iter--
+         */
+        const_iterator operator--(int) {
+            pos--;
+            return const_iterator(pos+1);
+        }
+        /**
+         * TODO --iter
+         */
+        const_iterator& operator--() {
+            pos--;
+            return *this;
+        }
+        /**
+         * TODO *it
+         */
+        const T& operator*() const{
+            return *pos;
+        }
+        /**
+         * a operator to check whether two iterators are same (pointing to the same memory address).
+         */
+        bool operator==(const iterator &rhs) const {
+            return (this->pos == rhs.pos);
+        }
+        bool operator==(const const_iterator &rhs) const {
+            return (this->pos == rhs.pos);
+        }
+        /**
+         * some other operator for iterator.
+         */
+        bool operator!=(const iterator &rhs) const {
+            return (this->pos != rhs.pos);
+        }
+        bool operator!=(const const_iterator &rhs) const {
+            return (this->pos != rhs.pos);
+        }
 	};
 	/**
 	 * TODO Constructs
@@ -139,15 +223,21 @@ public:
         mEnd = mStart = mEndOfStorage = nullptr;
     }
 	vector(const vector &other) {
-        mEnd = other.mEnd;
-        mStart = other.mStart;
-        mEndOfStorage = other.mEndOfStorage;
+        T *tmp = new T[int(other.capacity())];
+        size_t sz = other.size();
+        for (int i = 0; i < sz; ++i) {
+            tmp[i] = other[i];
+        }
+        mStart = tmp;
+        mEnd = tmp + sz;
+        mEndOfStorage = tmp + other.capacity();
     }
 	/**
 	 * TODO Destructor
 	 */
 	~vector() {
-        delete []mStart;
+        delete mStart;
+        mStart = mEnd = mEndOfStorage = nullptr;
     }
 	/**
 	 * TODO Assignment operator
@@ -156,9 +246,14 @@ public:
         if (this == &other)
             return *this;
         delete []mStart;
-        mEnd = other.mEnd;
-        mStart = other.mStart;
-        mEndOfStorage = other.mEndOfStorage;
+        T *tmp = new T[int(other.capacity())];
+        size_t sz = other.size();
+        for (int i = 0; i < sz; ++i) {
+            tmp[i] = other[i];
+        }
+        mStart = tmp;
+        mEnd = tmp + sz;
+        mEndOfStorage = tmp + other.capacity();
         return *this;
     }
 	/**
@@ -184,12 +279,13 @@ public:
 	T & operator[](const size_t &pos) {
         if (pos<0 || pos >= size())
             throw index_out_of_bound();
-        return *(mStart+pos);
+        return mStart[pos];
     }
 	const T & operator[](const size_t &pos) const {
         if (pos<0 || pos >= size())
             throw index_out_of_bound();
-        return *(mStart+pos);
+
+        return mStart[pos];
     }
 	/**
 	 * access the first element.
@@ -215,14 +311,18 @@ public:
 	iterator begin() {
         return iterator(mStart);
     }
-	const_iterator cbegin() const {}
+	const_iterator cbegin() const {
+        return const_iterator(mStart);
+    }
 	/**
 	 * returns an iterator to the end.
 	 */
 	iterator end() {
         return iterator(mEnd);
     }
-	const_iterator cend() const {}
+	const_iterator cend() const {
+        return const_iterator(mEnd);
+    }
 	/**
 	 * checks whether the container is empty
 	 */
@@ -238,7 +338,9 @@ public:
 	/**
 	 * clears the contents
 	 */
-	void clear() {}
+	void clear() {
+        mEnd = mStart;
+    }
 	/**
 	 * inserts value before pos
 	 * returns an iterator pointing to the inserted value.
@@ -257,7 +359,6 @@ public:
         }
         mEnd++;
         *pos = value;
-
 
         return pos;
 
@@ -329,7 +430,9 @@ public:
             reserve(newSize);
         }
         *mEnd = value;
+
         mEnd++;
+
     }
 	/**
 	 * remove the last element from the end.
@@ -341,7 +444,7 @@ public:
         mEnd--;
     }
 
-    const size_t capacity(){
+    size_t capacity() const{
         return mEndOfStorage - mStart;
     }
 
@@ -351,7 +454,10 @@ public:
             size_t size1 = size();
             if (mStart){
 //                拷贝newSize 份 还是 size1 份呢？
-                memcmp(tmp,mStart,sizeof(T)*size1);
+                for (size_t i = 0; i < size1; ++i)
+                {
+                    tmp[i] = mStart[i];
+                }
                 delete mStart;
             }
             mStart = tmp;

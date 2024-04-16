@@ -1,9 +1,9 @@
 #include "vector.hpp"
-
+#include <vector>
 #include "class-integer.hpp"
 #include "class-matrix.hpp"
 #include "class-bint.hpp"
-
+#include "class-ftc.hpp"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -31,6 +31,12 @@ void TestMatrix()
 	}
 }
 
+void TestFtc(){
+    sjtu::vector<Ftc> vct;
+    vct.reserve(100);
+    std::vector<Ftc> v;
+}
+
 void TestBint()
 {
 	std::cout << "Test for big integer" << std::endl;
@@ -52,7 +58,7 @@ int main()
     TestInteger();
     TestMatrix();
     TestBint();
-
+    TestFtc();
 
     return 0;
 }

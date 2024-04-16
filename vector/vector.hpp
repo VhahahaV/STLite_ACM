@@ -6,7 +6,6 @@
 #include <climits>
 #include <cstddef>
 #include "iostream"
-//代码寄了，越界
 namespace sjtu {
 /**
  * a data container like std::vector
@@ -346,7 +345,7 @@ public:
 	 * returns an iterator pointing to the inserted value.
 	 */
 	iterator insert(iterator pos, const T &value) {
-        if (pos.getPos() == mEndOfStorage){
+        if (pos.getPos() == mEndOfStorage||size() == capacity()){
             int n = pos.getPos() - mStart;
             size_t newSize = capacity()==0 ? 2 : capacity()*2;
             reserve(newSize);
@@ -372,7 +371,7 @@ public:
 	iterator insert(const size_t &ind, const T &value) {
         if(ind > size())
             throw index_out_of_bound();
-        if (mStart+ind == mEndOfStorage){
+        if (mStart+ind == mEndOfStorage||size() == capacity()){
             size_t newSize = capacity()==0 ? 2 : capacity()*2;
             reserve(newSize);
         }
@@ -429,8 +428,10 @@ public:
             size_t newSize = capacity()==0 ? 2 : capacity()*2;
             reserve(newSize);
         }
-        *mEnd = value;
-
+//        会调用构造函数
+//        *mEnd = value;
+//       new可以直接在指定的内存位置上构造对象
+        new (mEnd) T(value);
         mEnd++;
 
     }
@@ -450,15 +451,20 @@ public:
 
     void reserve(size_t newSize){
         if (newSize > capacity()){
-            T *tmp = new T[newSize];
+//            直接用new 会有问题，因为new 会调用构造函数，但是这里只是扩容，并不需要构造函数
+//            T *tmp = new T[newSize];
+            auto tmp = static_cast<T *>(malloc(sizeof(T) * newSize));
             size_t size1 = size();
             if (mStart){
 //                拷贝newSize 份 还是 size1 份呢？
-                for (size_t i = 0; i < size1; ++i)
-                {
-                    tmp[i] = mStart[i];
-                }
-                delete mStart;
+//                for (size_t i = 0; i < size1; ++i)
+//                {
+//                    tmp[i] = mStart[i];
+//                }
+                memcpy(tmp, mStart, sizeof(T) * size1);
+//                直接delete mStart 会有问题，因为delete 会调用析构函数，但是这里只是扩容，并不需要析构函数
+//                delete mStart;
+                free(mStart);
             }
             mStart = tmp;
             mEnd = mStart + size1;

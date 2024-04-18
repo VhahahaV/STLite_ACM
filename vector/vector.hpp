@@ -236,6 +236,9 @@ public:
 	 * TODO Destructor
 	 */
 	~vector() {
+        for(auto p = mStart; p<mEnd; p++){
+            p->~T();
+        }
         free(mStart) ;
         mStart = mEnd = mEndOfStorage = nullptr;
     }
@@ -433,8 +436,9 @@ public:
         }
 //        会调用构造函数
 //        *mEnd = value;
-//       new可以直接在指定的内存位置上构造对象,但是这里不能使用构造函数,
+//       new可以直接在指定的内存位置上构造对象,但是这里不能使用构造函数,使用了new，但是new出来的空间没有释放，会造成内存泄漏
         new (mEnd) T(value);
+//        *mEnd(value);
         mEnd++;
 
     }

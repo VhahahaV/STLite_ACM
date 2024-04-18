@@ -50,6 +50,20 @@ void TestBint()
 	std::cout << std::endl;
 }
 
+void TestBintStd()
+{
+    namespace sjtu = std;
+    std::cout << "Test for big integer" << std::endl;
+    sjtu::vector<Util::Bint> vBint;
+    for (long long i = 1LL << 50; i < (1LL << 50) + 10; ++i) {
+        vBint.push_back(Util::Bint(i) * i);
+    }
+    for (sjtu::vector<Util::Bint>::iterator it = vBint.begin(); it != vBint.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+}
+
 int main()
 {
 
